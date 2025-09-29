@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3">Upcoming events</h1>
+
+<form class="mb-3" method="get">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search events or venues">
+  <input type="text" name="from" value="{{ date_from }}" placeholder="From (YYYY-MM-DD)">
+  <input type="text" name="to" value="{{ date_to }}" placeholder="To (YYYY-MM-DD)">
+  <button type="submit">Search</button>
+  {% if q or date_from or date_to %}
+    <a href="{% url 'event_list' %}">Clear</a>
+  {% endif %}
+</form>
+
+{% if page_obj.object_list %}
+  <ul>
+    {% for e in page_obj.object_list %}
+      <li>
+        <a href="{% url 'event_detail' e.pk %}">
+          {{ e.title }}
+        </a>
+        — {{ e.starts_at|date:"M d, Y H:i" }} @ {{ e.venue.name }}
+        {% if e.lowest_price %} • from ${{ e.lowest_price }}{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+
+  <nav aria-label="Pagination">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&from={{ date_from }}&to={{ date_to }}">Prev</a>
+    {% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&from={{ date_from }}&to={{ date_to }}">Next</a>
+    {% endif %}
+  </nav>
+{% else %}
+  <p>No events found. Try a different search.</p>
+{% endif %}
+{% endblock %}
