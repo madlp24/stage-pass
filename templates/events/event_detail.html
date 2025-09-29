@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{% url 'event_list' %}">← Back to events</a>
+<h1 class="h3">{{ event.title }}</h1>
+<p><strong>When:</strong> {{ event.starts_at|date:"M d, Y H:i" }} – {{ event.ends_at|date:"H:i" }}</p>
+<p><strong>Where:</strong> {{ event.venue.name }} — {{ event.venue.address }}</p>
+<p>{{ event.description }}</p>
+
+<h2 class="h5">Ticket tiers</h2>
+<ul>
+  {% for t in event.ticket_types.all %}
+    <li>
+      {{ t.name }} — ${{ t.price }} • Capacity: {{ t.capacity }}
+      {# we'll swap to “remaining” once we implement sales #}
+    </li>
+  {% empty %}
+    <li>No ticket tiers defined yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
