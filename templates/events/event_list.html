@@ -1,40 +1,80 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="h3">Upcoming events</h1>
+<h1 class="h3 mb-3">Upcoming events</h1>
 
-<form class="mb-3" method="get">
-  <input type="text" name="q" value="{{ q }}" placeholder="Search events or venues">
-  <input type="text" name="from" value="{{ date_from }}" placeholder="From (YYYY-MM-DD)">
-  <input type="text" name="to" value="{{ date_to }}" placeholder="To (YYYY-MM-DD)">
-  <button type="submit">Search</button>
+<form class="row gy-2 gx-2 align-items-end mb-4" method="get">
+  <div class="col-sm-5">
+    <label class="form-label">Search</label>
+    <input class="form-control" type="text" name="q" value="{{ q }}" placeholder="Event or venue">
+  </div>
+  <div class="col-sm-3">
+    <label class="form-label">From</label>
+    <input class="form-control" type="date" name="from" value="{{ date_from }}">
+  </div>
+  <div class="col-sm-3">
+    <label class="form-label">To</label>
+    <input class="form-control" type="date" name="to" value="{{ date_to }}">
+  </div>
+  <div class="col-sm-1 d-grid">
+    <button class="btn btn-primary" type="submit">Go</button>
+  </div>
   {% if q or date_from or date_to %}
-    <a href="{% url 'event_list' %}">Clear</a>
+    <div class="col-12">
+      <a class="small" href="{% url 'event_list' %}">Clear filters</a>
+    </div>
   {% endif %}
 </form>
 
 {% if page_obj.object_list %}
-  <ul>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
     {% for e in page_obj.object_list %}
-      <li>
-        <a href="{% url 'event_detail' e.pk %}">
-          {{ e.title }}
-        </a>
-        — {{ e.starts_at|date:"M d, Y H:i" }} @ {{ e.venue.name }}
-        {% if e.lowest_price %} • from ${{ e.lowest_price }}{% endif %}
-      </li>
+      <div class="col">
+        <div class="card h-100">
+          {% if e.image %}
+          <img src="{{ e.image }}" class="card-img-top" alt="Poster for {{ e.title }}">
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <h2 class="card-title h5 mb-2">
+              <a href="{% url 'event_detail' e.pk %}" class="stretched-link text-decoration-none">
+                {{ e.title }}
+              </a>
+            </h2>
+            <p class="mb-1 text-muted">
+              {{ e.starts_at|date:"D, M j, Y · H:i" }} @ {{ e.venue.name }}
+            </p>
+            {% if e.lowest_price %}
+              <p class="mb-0 fw-semibold">From ${{ e.lowest_price }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
 
-  <nav aria-label="Pagination">
-    {% if page_obj.has_previous %}
-      <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&from={{ date_from }}&to={{ date_to }}">Prev</a>
-    {% endif %}
-    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-    {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&from={{ date_from }}&to={{ date_to }}">Next</a>
-    {% endif %}
+  <nav class="mt-4" aria-label="Pagination">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&from={{ date_from }}&to={{ date_to }}">Prev</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Prev</span></li>
+      {% endif %}
+
+      <li class="page-item disabled">
+        <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      </li>
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&from={{ date_from }}&to={{ date_to }}">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
   </nav>
 {% else %}
-  <p>No events found. Try a different search.</p>
+  <div class="alert alert-info">No events found. Try a different search.</div>
 {% endif %}
 {% endblock %}
