@@ -1,6 +1,5 @@
 from django.db import models
-
-# Create your models here.
+from django.db.models import Sum
 
 class Venue(models.Model):
     name = models.CharField(max_length=120)
@@ -9,6 +8,7 @@ class Venue(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Event(models.Model):
     venue = models.ForeignKey(Venue, on_delete=models.PROTECT, related_name="events")
@@ -22,6 +22,7 @@ class Event(models.Model):
     def __str__(self):
         return f"{self.title} @ {self.venue}"
 
+
 class TicketType(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="ticket_types")
     name = models.CharField(max_length=120)
@@ -31,3 +32,14 @@ class TicketType(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.event.title}"
+
+    def sold_quantity(self):
+        from orders.models import OrderItem  # late import to avoid circular import
+        return (
+            OrderItem.objects
+            .filter(ticket_type=self, order__status__in=["PENDING", "PAID"])
+            .aggregate(total=Sum("qty"))["total"] or 0
+        )
+
+    def remaining_capacity(self):
+        return max(self.capacity - self.sold_quantity(), 0)
