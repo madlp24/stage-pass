@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3 mb-3">My orders</h1>
+
+{% if orders %}
+  <div class="list-group">
+    {% for o in orders %}
+      <div class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <div>
+            <strong>Order #{{ o.id }}</strong>
+            <span class="text-muted"> · {{ o.created_at|date:"M j, Y H:i" }}</span>
+            <span class="badge bg-secondary ms-2">{{ o.status }}</span>
+          </div>
+          <div class="fw-semibold">${{ o.total }}</div>
+        </div>
+        <ul class="mt-2 mb-0 small">
+          {% for it in o.items.all %}
+            <li>{{ it.ticket_type.event.title }} — {{ it.ticket_type.name }} × {{ it.qty }} @ ${{ it.unit_price }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info">You don’t have any orders yet.</div>
+{% endif %}
+{% endblock %}
