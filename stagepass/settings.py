@@ -8,14 +8,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -----------------------------------------------------------------------------
 # Security
 # -----------------------------------------------------------------------------
-DEBUG = True  # You control this manually!
+DEBUG = False  
 
 SECRET_KEY = os.environ.get(
     "SECRET_KEY",
     "django-insecure-rm(gh1k1ib25k-d@^lylz#cqeh5)^wsh6fgynl%!)*s$%m9@8+" 
 )
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    ".herokuapp.com",
+    "127.0.0.1",
+    "localhost"
+]
 if os.environ.get("ALLOWED_HOSTS"):
     ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(",")
 
