@@ -1,1 +1,1 @@
-web: gunicorn stage_pass.wsgi
+web: gunicorn stagepass.wsgi
