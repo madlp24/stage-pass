@@ -1,0 +1,14 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fafafa;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: #222;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
