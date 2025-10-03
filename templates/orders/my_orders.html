@@ -8,7 +8,7 @@
       <div class="list-group-item">
         <div class="d-flex justify-content-between">
           <div>
-            <strong>Order #{{ o.id }}</strong>
+            <a href="{% url 'order_detail' o.id %}"><strong>Order #{{ o.id }}</strong></a>
             <span class="text-muted"> · {{ o.created_at|date:"M j, Y H:i" }}</span>
             <span class="badge bg-secondary ms-2">{{ o.status }}</span>
           </div>

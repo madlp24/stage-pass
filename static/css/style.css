@@ -12,3 +12,14 @@ body {
 h1, h2, h3 {
     color: #333;
 }
+/* Event cards hover effect */
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Form inputs spacing */
+form .form-control {
+  border-radius: 0.5rem;
+}
