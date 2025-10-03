@@ -35,8 +35,9 @@
           {% endif %}
           <div class="card-body d-flex flex-column">
             <h2 class="card-title h5 mb-2">
-              <a href="{% url 'event_detail' e.pk %}" class="stretched-link text-decoration-none">
-                {{ e.title }}
+              <a href="{% if e.slug %}{% url 'event_detail_slug' e.slug %}{% else %}{% url 'event_detail' e.pk %}{% endif %}" 
+                class="stretched-link text-decoration-none">
+
               </a>
             </h2>
             <p class="mb-1 text-muted">

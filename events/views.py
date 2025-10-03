@@ -3,6 +3,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Min, Q
+from django.db.models import Sum, F, DecimalField, IntegerField, Q
+from django.db.models.functions import Coalesce
+from orders.models import OrderItem, Order
 from .forms import VenueForm, EventForm
 from .models import Venue, Event
 
@@ -51,6 +54,13 @@ def event_detail(request, pk):
     )
     return render(request, "events/event_detail.html", {"event": event})
 
+def event_detail_slug(request, slug):
+    event = get_object_or_404(
+        Event.objects.select_related("venue").prefetch_related("ticket_types"),
+        slug=slug, published=True
+    )
+    return render(request, "events/event_detail.html", {"event": event})
+
 # ---------- Organizer: CRUD ----------
 @login_required
 def venue_create(request):
@@ -88,3 +98,40 @@ def event_update(request, pk):
     else:
         form = EventForm(instance=event)
     return render(request, "events/event_form.html", {"form": form})
+
+@login_required
+def organizer_dashboard(request):
+    if not request.user.is_staff:
+        messages.error(request, "Organizer dashboard is restricted.")
+        return redirect("event_list")
+
+    tt_capacity = Coalesce(Sum("ticket_types__capacity"), 0, output_field=IntegerField())
+
+    sold_q = Coalesce(
+        Sum(
+            "ticket_types__orderitem__qty",
+            filter=Q(ticket_types__orderitem__order__status__in=["PENDING", "PAID"])
+        ),
+        0,
+        output_field=IntegerField()
+    )
+
+    revenue = Coalesce(
+        Sum(
+            F("ticket_types__orderitem__qty") * F("ticket_types__orderitem__unit_price"),
+            filter=Q(ticket_types__orderitem__order__status__in=["PENDING", "PAID"]),
+            output_field=DecimalField(max_digits=12, decimal_places=2),
+        ),
+        0,
+        output_field=DecimalField(max_digits=12, decimal_places=2),
+    )
+
+    qs = (
+        Event.objects
+        .select_related("venue")
+        .annotate(total_capacity=tt_capacity, sold=sold_q, revenue=revenue)
+        .annotate(remaining=Coalesce(F("total_capacity") - F("sold"), 0, output_field=IntegerField()))
+        .order_by("-starts_at")
+    )
+
+    return render(request, "events/dashboard.html", {"events": qs})
