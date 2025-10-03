@@ -11,6 +11,6 @@ urlpatterns = [
     path("new/", views.event_create, name="event_create"),
     path("<int:pk>/edit/", views.event_update, name="event_update"),
     path("export.csv", views.export_events_csv, name="export_events_csv"),
-
+    path("dashboard/", views.organizer_dashboard, name="organizer_dashboard"),
 ]
 
