@@ -22,5 +22,7 @@ class OrderItem(models.Model):
     qty = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=8, decimal_places=2)
 
+    @property
     def line_total(self):
         return self.qty * self.unit_price
+
