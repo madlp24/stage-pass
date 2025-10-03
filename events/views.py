@@ -1,15 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
-from django.db.models import Min, Q
-from django.db.models import Sum, F, DecimalField, IntegerField, Q
+from django.http import HttpResponse  #for CSV export
+from django.db.models import Min, Sum, F, DecimalField, IntegerField, Q  #unified imports
 from django.db.models.functions import Coalesce
-from orders.models import OrderItem, Order
+from orders.models import OrderItem, Order # for dashboard stats
 from .forms import VenueForm, EventForm
 from .models import Venue, Event
 
-# Create your views here.
+
 # ---------- Public: list + detail ----------
 def event_list(request):
     q = request.GET.get("q", "").strip()
@@ -47,6 +48,7 @@ def event_list(request):
         "page_obj": page_obj, "q": q, "date_from": date_from, "date_to": date_to
     })
 
+
 def event_detail(request, pk):
     event = get_object_or_404(
         Event.objects.select_related("venue").prefetch_related("ticket_types"),
@@ -54,12 +56,14 @@ def event_detail(request, pk):
     )
     return render(request, "events/event_detail.html", {"event": event})
 
+
 def event_detail_slug(request, slug):
     event = get_object_or_404(
         Event.objects.select_related("venue").prefetch_related("ticket_types"),
         slug=slug, published=True
     )
     return render(request, "events/event_detail.html", {"event": event})
+
 
 # ---------- Organizer: CRUD ----------
 @login_required
@@ -74,6 +78,7 @@ def venue_create(request):
         form = VenueForm()
     return render(request, "events/venue_form.html", {"form": form})
 
+
 @login_required
 def event_create(request):
     if request.method == "POST":
@@ -85,6 +90,7 @@ def event_create(request):
     else:
         form = EventForm()
     return render(request, "events/event_form.html", {"form": form})
+
 
 @login_required
 def event_update(request, pk):
@@ -99,6 +105,8 @@ def event_update(request, pk):
         form = EventForm(instance=event)
     return render(request, "events/event_form.html", {"form": form})
 
+
+# ---------- Organizer: Dashboard & CSV ----------
 @login_required
 def organizer_dashboard(request):
     if not request.user.is_staff:
@@ -134,4 +142,42 @@ def organizer_dashboard(request):
         .order_by("-starts_at")
     )
 
+    # Template path: templates/events/dashboard.html
     return render(request, "events/dashboard.html", {"events": qs})
+
+
+@staff_member_required  # only staff can export
+def export_events_csv(request):
+    """
+    Export events to CSV (id, title, venue, starts_at, ends_at, published, lowest_price, slug).
+    """
+    import csv
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="events.csv"'
+    writer = csv.writer(response)
+
+    # header row
+    writer.writerow(["id", "title", "venue", "starts_at", "ends_at",
+                     "published", "lowest_price", "slug"])
+
+    qs = (
+        Event.objects
+        .select_related("venue")
+        .annotate(lowest_price=Min("ticket_types__price"))
+        .order_by("starts_at")
+    )
+
+    for e in qs:
+        writer.writerow([
+            e.id,
+            e.title,
+            e.venue.name if e.venue_id else "",
+            e.starts_at,
+            e.ends_at,
+            e.published,
+            e.lowest_price or "",
+            getattr(e, "slug", ""),
+        ])
+
+    return response
