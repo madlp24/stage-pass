@@ -1,13 +1,17 @@
 from decimal import Decimal
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from events.models import TicketType
-from .models import Order, OrderItem
 from .cart import add_item, set_qty, remove_item, items_with_details, empty
+from .models import Order, OrderItem
 
 
 def cart_detail(request):
@@ -105,6 +109,24 @@ def checkout(request):
         order.total = total
         order.save()
 
+    # Email receipt (console in dev; SMTP if configured via env)
+    subject = f"StagePass - Order #{order.pk} confirmed"
+    site_root = request.build_absolute_uri("/").rstrip("/")
+    order_url = site_root + reverse("order_detail", args=[order.pk])
+    message = (
+        f"Thanks for your purchase!\n\n"
+        f"Order #{order.pk}\n"
+        f"Total: ${order.total}\n\n"
+        f"View your order: {order_url}\n"
+    )
+    recipient = [request.user.email] if request.user.email else []
+    if recipient:
+        try:
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient, fail_silently=True)
+        except Exception:
+            # don't block checkout on email errors
+            pass
+
     empty(request.session)
     messages.success(request, f"Order #{order.pk} confirmed. Thank you!")
     return render(request, "orders/receipt.html", {"order": order})
@@ -118,3 +140,12 @@ def my_orders(request):
         .order_by("-created_at")
     )
     return render(request, "orders/my_orders.html", {"orders": orders})
+
+
+@login_required
+def order_detail(request, pk):
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items__ticket_type__event"),
+        pk=pk, user=request.user
+    )
+    return render(request, "orders/order_detail.html", {"order": order})

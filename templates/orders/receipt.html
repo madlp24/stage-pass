@@ -1,10 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h1 class="h3 mb-3">Order confirmed</h1>
 <p>Thank you! Your order number is <strong>#{{ order.id }}</strong>.</p>
 
 <table class="table">
-  <thead><tr><th>Ticket</th><th class="text-end">Qty</th><th class="text-end">Unit</th><th class="text-end">Total</th></tr></thead>
+  <thead>
+    <tr>
+      <th>Ticket</th>
+      <th class="text-end">Qty</th>
+      <th class="text-end">Unit</th>
+      <th class="text-end">Total</th>
+    </tr>
+  </thead>
   <tbody>
     {% for item in order.items.all %}
       <tr>
@@ -23,5 +31,9 @@
   </tfoot>
 </table>
 
-<a href="{% url 'event_list' %}" class="btn btn-outline-primary">Continue browsing</a>
+<div class="mt-3 d-flex gap-2">
+  <a href="{% url 'event_list' %}" class="btn btn-outline-primary">Continue browsing</a>
+  <a href="{% url 'my_orders' %}" class="btn btn-primary">View my orders</a>
+</div>
+
 {% endblock %}
