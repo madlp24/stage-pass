@@ -1,4 +1,11 @@
 {% extends "base.html" %}
+{% block title %}{{ event.title }} · StagePass{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ event.title }}{% endblock %}
+{% block og_desc %}{{ event.description|truncatechars:150 }}{% endblock %}
+{% block og_image %}{% if event.image %}{{ event.image }}{% endif %}{% endblock %}
+{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
+
 {% block content %}
 <a class="btn btn-link p-0 mb-3" href="{% url 'event_list' %}">← Back to events</a>
 
