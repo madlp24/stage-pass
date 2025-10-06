@@ -1,3 +1,4 @@
+from django.views.decorators.cache import cache_page
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,13 +13,17 @@ from .models import Venue, Event
 
 
 # ---------- Public: list + detail ----------
+@cache_page(60 * 15)  # cache for 15 minutes
 def event_list(request):
     q = request.GET.get("q", "").strip()
     date_from = request.GET.get("from", "").strip()
     date_to = request.GET.get("to", "").strip()
 
-    events = Event.objects.filter(published=True).annotate(
-        lowest_price=Min("ticket_types__price")
+    events = (
+        Event.objects.filter(published=True)
+        .select_related("venue")                 # 👈 preload FK
+        .prefetch_related("ticket_types")        # 👈 preload M2O reverse
+        .annotate(lowest_price=Min("ticket_types__price"))
     )
 
     if q:
@@ -44,9 +49,12 @@ def event_list(request):
     events = events.order_by("starts_at")
     page_obj = Paginator(events, 12).get_page(request.GET.get("page"))
 
-    return render(request, "events/event_list.html", {
-        "page_obj": page_obj, "q": q, "date_from": date_from, "date_to": date_to
-    })
+    return render(
+        request,
+        "events/event_list.html",
+        {"page_obj": page_obj, "q": q, "date_from": date_from, "date_to": date_to},
+    )
+
 
 
 def event_detail(request, pk):
@@ -55,6 +63,7 @@ def event_detail(request, pk):
     )
     return redirect("event_detail_slug", slug=event.slug, permanent=True)
 
+@cache_page(60 * 15)  # cache for 15 minutes
 def event_detail_slug(request, slug):
     event = get_object_or_404(
         Event.objects.select_related("venue").prefetch_related("ticket_types"),
