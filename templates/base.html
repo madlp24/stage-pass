@@ -88,4 +88,15 @@
   <script src="{% static 'js/main.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
+<script>
+  const alerts = document.querySelectorAll('.alert');
+  if (alerts.length) {
+    setTimeout(() => {
+      alerts.forEach(a => {
+        const bsAlert = new bootstrap.Alert(a);
+        bsAlert.close();
+      });
+    }, 4000);
+  }
+</script>
 </html>
