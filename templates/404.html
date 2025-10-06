@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center my-5">
+  <h1 class="display-5">404</h1>
+  <p class="lead">We couldn’t find that page.</p>
+  <a href="{% url 'event_list' %}" class="btn btn-primary mt-3">Back to events</a>
+</div>
+{% endblock %}

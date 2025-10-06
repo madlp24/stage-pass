@@ -51,11 +51,9 @@ def event_list(request):
 
 def event_detail(request, pk):
     event = get_object_or_404(
-        Event.objects.select_related("venue").prefetch_related("ticket_types"),
-        pk=pk, published=True
+        Event.objects.only("slug", "published"), pk=pk, published=True
     )
-    return render(request, "events/event_detail.html", {"event": event})
-
+    return redirect("event_detail_slug", slug=event.slug, permanent=True)
 
 def event_detail_slug(request, slug):
     event = get_object_or_404(
