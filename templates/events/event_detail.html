@@ -17,8 +17,9 @@
     <p class="mb-3"><strong>Where:</strong> {{ event.venue.name }} — {{ event.venue.address }}</p>
 
     {% if event.image %}
-      <img class="img-fluid rounded mb-3" src="{{ event.image }}" alt="Poster for {{ event.title }}">
+      <img class="img-fluid rounded mb-3" src="{{ event.image.url }}" alt="Poster for {{ event.title }}">
     {% endif %}
+
 
     <p>{{ event.description }}</p>
   </div>

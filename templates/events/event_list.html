@@ -31,8 +31,9 @@
       <div class="col">
         <div class="card h-100">
           {% if e.image %}
-          <img src="{{ e.image }}" class="card-img-top" alt="Poster for {{ e.title }}">
+            <img src="{{ e.image.url }}" class="card-img-top" alt="Poster for {{ e.title }}">
           {% endif %}
+
           <div class="card-body d-flex flex-column">
             <h2 class="card-title h5 mb-2">
               <a href="{% if e.slug %}{% url 'event_detail_slug' e.slug %}{% else %}{% url 'event_detail' e.pk %}{% endif %}" 

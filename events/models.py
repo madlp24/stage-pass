@@ -12,18 +12,17 @@ class Venue(models.Model):
 class Event(models.Model):
     venue = models.ForeignKey(Venue, on_delete=models.PROTECT, related_name="events")
     title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=220, unique=True, blank=True)  # NEW
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
     description = models.TextField()
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
     published = models.BooleanField(default=False)
-    image = models.URLField(blank=True)
+    image = models.ImageField(upload_to="events/", blank=True, null=True)
 
     def __str__(self):
         return f"{self.title} @ {self.venue}"
 
     def save(self, *args, **kwargs):
-        # generate slug once (or when title changes and slug empty)
         if not self.slug:
             base = slugify(self.title)[:200] or "event"
             slug = base
