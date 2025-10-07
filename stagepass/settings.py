@@ -10,6 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -----------------------------------------------------------------------------
 DEBUG = False  
 
+if os.path.exists(Path(__file__).resolve().parent.parent / "env.py"):
+    import env
+    
 SECRET_KEY = os.environ.get(
     "SECRET_KEY",
     "django-insecure-rm(gh1k1ib25k-d@^lylz#cqeh5)^wsh6fgynl%!)*s$%m9@8+" 
@@ -41,6 +44,8 @@ INSTALLED_APPS = [
 
     "crispy_forms",
     "crispy_bootstrap5",
+    'cloudinary',
+    'cloudinary_storage',
 
     # Local apps
     "core",
@@ -86,7 +91,7 @@ TEMPLATES = [
         },
     },
 ]
-
+BASE_DIR = Path(__file__).resolve().parent.parent
 WSGI_APPLICATION = "stagepass.wsgi.application"
 
 # -----------------------------------------------------------------------------
