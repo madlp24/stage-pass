@@ -1,12 +1,43 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags %}
-
+{% block title %}Log in · StagePass{% endblock %}
 {% block content %}
-<h1 class="h4 mb-3">Login</h1>
-<form method="post" class="mb-3">
-  {% csrf_token %}
-  {{ form|crispy }}
-  <button type="submit" class="btn btn-primary">Sign in</button>
-</form>
-<p class="text-muted">Don’t have an account? Ask an admin to create one for now.</p>
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <h1 class="h3 mb-3">Log in</h1>
+
+    {% if form.errors %}
+      <div class="alert alert-danger">Please correct the errors below.</div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label" for="id_username">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <div class="text-danger small">{{ form.username.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="id_password">Password</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+          <div class="text-danger small">{{ form.password.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+      <div class="d-grid gap-2">
+        <button class="btn btn-primary" type="submit">Log in</button>
+      </div>
+
+      <p class="mt-3 mb-0 small">
+        Don’t have an account? <a href="{% url 'signup' %}">Sign up</a>
+      </p>
+    </form>
+  </div>
+</div>
 {% endblock %}

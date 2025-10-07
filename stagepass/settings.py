@@ -8,11 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -----------------------------------------------------------------------------
 # Security
 # -----------------------------------------------------------------------------
-DEBUG = False  
+DEBUG = True  
 
 if os.path.exists(Path(__file__).resolve().parent.parent / "env.py"):
     import env
-    
+
 SECRET_KEY = os.environ.get(
     "SECRET_KEY",
     "django-insecure-rm(gh1k1ib25k-d@^lylz#cqeh5)^wsh6fgynl%!)*s$%m9@8+" 
