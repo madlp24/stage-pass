@@ -5,6 +5,8 @@ import dj_database_url  # pip install dj-database-url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+USE_CLOUDINARY = bool(os.environ.get("CLOUDINARY_URL"))
+
 # -----------------------------------------------------------------------------
 # Security
 # -----------------------------------------------------------------------------
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'django.contrib.sitemaps',
+    "django.contrib.humanize",
 
     "crispy_forms",
     "crispy_bootstrap5",
@@ -104,6 +107,11 @@ DATABASES = {
     }
 }
 
+# MEDIA settings
+MEDIA_URL = "/media/"
+if not USE_CLOUDINARY:
+    MEDIA_ROOT = BASE_DIR / "media"
+
 if os.environ.get("DATABASE_URL"):
     DATABASES["default"] = dj_database_url.config(
         default=os.environ["DATABASE_URL"],
@@ -139,7 +147,12 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    }
+    },
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"
+        if USE_CLOUDINARY
+        else "django.core.files.storage.FileSystemStorage",
+    },
 }
 
 # -----------------------------------------------------------------------------
