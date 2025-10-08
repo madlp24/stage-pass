@@ -69,6 +69,7 @@
         {% if user.is_authenticated %}
           <div class="mt-3 d-flex gap-2">
             <a class="btn btn-outline-secondary" href="{% url 'event_update' event.pk %}">Edit event</a>
+            <a class="btn btn-outline-danger" href="{% url 'event_delete' event.pk %}">Delete</a>
             <a class="btn btn-outline-secondary" href="{% url 'venue_create' %}">Add venue</a>
           </div>
         {% endif %}

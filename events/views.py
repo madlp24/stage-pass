@@ -11,6 +11,7 @@ from django.db.models.functions import Coalesce
 from orders.models import OrderItem, Order # for dashboard stats
 from .forms import VenueForm, EventForm
 from .models import Venue, Event
+from django.http import HttpResponseForbidden
 
 
 # ---------- Public: list + detail ----------
@@ -22,8 +23,8 @@ def event_list(request):
 
     events = (
         Event.objects.filter(published=True)
-        .select_related("venue")                 # 👈 preload FK
-        .prefetch_related("ticket_types")        # 👈 preload M2O reverse
+        .select_related("venue")                 
+        .prefetch_related("ticket_types")        
         .annotate(lowest_price=Min("ticket_types__price"))
     )
 
@@ -217,3 +218,21 @@ def export_events_csv(request):
         ])
 
     return response
+
+@login_required
+def event_delete(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+
+    # Only staff or organizer/owner can delete
+    is_owner = getattr(event, "organizer_id", None) == request.user.id
+    if not (request.user.is_staff or is_owner):
+        return HttpResponseForbidden("You don’t have permission to delete this event.")
+
+    if request.method == "POST":
+        title = event.title
+        event.delete()
+        messages.success(request, f'“{title}” was deleted.')
+        return redirect("event_list")
+
+    # GET: show confirmation screen
+    return render(request, "events/event_confirm_delete.html", {"event": event})

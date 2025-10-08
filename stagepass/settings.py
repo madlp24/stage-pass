@@ -10,7 +10,7 @@ USE_CLOUDINARY = bool(os.environ.get("CLOUDINARY_URL"))
 # -----------------------------------------------------------------------------
 # Security
 # -----------------------------------------------------------------------------
-DEBUG = False  
+DEBUG = True  
 
 if os.path.exists(Path(__file__).resolve().parent.parent / "env.py"):
     import env
