@@ -4,19 +4,20 @@
 {% block title %}Home • StagePass{% endblock %}
 
 {% block content %}
-<div class="container text-center py-5">
+<div class="container text-center py-5" style="color: #f8f9fa;">
   <div class="row justify-content-center align-items-center">
     <div class="col-md-8">
-      <h1 class="display-4 fw-bold mb-3 text-dark">
-        Welcome to <span class="text-primary">StagePass</span>
+      <h1 class="display-4 fw-bold mb-3" style="color: #ffffff;">
+        Welcome to <span style="color: #3b82f6;">StagePass</span>
       </h1>
-      <p class="lead text-muted mb-4">
+      <p class="lead mb-4" style="color: #dbeafe;">
         Your all-access pass to amazing live events and performances.
       </p>
-      <a href="{% url 'event_list' %}" class="btn btn-primary btn-lg px-4">
+      <a href="{% url 'event_list' %}" class="btn btn-warning btn-lg px-4 text-dark fw-semibold">
         Browse Events
       </a>
     </div>
   </div>
 </div>
 {% endblock %}
+
