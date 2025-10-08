@@ -20,17 +20,18 @@ SECRET_KEY = os.environ.get(
     "django-insecure-rm(gh1k1ib25k-d@^lylz#cqeh5)^wsh6fgynl%!)*s$%m9@8+" 
 )
 
-ALLOWED_HOSTS = [
-    ".herokuapp.com",
-    "127.0.0.1",
-    "localhost"
-]
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    ".herokuapp.com,127.0.0.1,localhost"
+).split(",")
+
 if os.environ.get("ALLOWED_HOSTS"):
     ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(",")
 
-CSRF_TRUSTED_ORIGINS = []
-if os.environ.get("CSRF_TRUSTED_ORIGINS"):
-    CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    "CSRF_TRUSTED_ORIGINS",
+    ""
+).split(",") if os.environ.get("CSRF_TRUSTED_ORIGINS") else []
 
 # -----------------------------------------------------------------------------
 # Apps
@@ -154,6 +155,10 @@ STORAGES = {
         else "django.core.files.storage.FileSystemStorage",
     },
 }
+
+# Honor X-Forwarded headers from Heroku's router
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 
 # -----------------------------------------------------------------------------
 # Email
