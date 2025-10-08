@@ -50,21 +50,12 @@
         {% endfor %}
 
         {% if events %}
-        <!-- Totals row -->
         <tr class="table-light">
           <th colspan="2" class="text-end">Totals</th>
-          <th class="text-end">
-            {{ events|sum:"total_capacity"|default_if_none:0|intcomma }}
-          </th>
-          <th class="text-end">
-            {{ events|sum:"sold"|default_if_none:0|intcomma }}
-          </th>
-          <th class="text-end">
-            {{ events|sum:"remaining"|default_if_none:0|intcomma }}
-          </th>
-          <th class="text-end">
-            ${{ events|sum:"revenue"|default_if_none:0|floatformat:2|intcomma }}
-          </th>
+          <th class="text-end">{{ totals.total_capacity|default_if_none:0|intcomma }}</th>
+          <th class="text-end">{{ totals.sold|default_if_none:0|intcomma }}</th>
+          <th class="text-end">{{ totals.remaining|default_if_none:0|intcomma }}</th>
+          <th class="text-end">${{ totals.revenue|default_if_none:0|floatformat:2|intcomma }}</th>
           <th colspan="2"></th>
         </tr>
         {% endif %}

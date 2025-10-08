@@ -22,7 +22,7 @@ urlpatterns = [
     path("", include("django.contrib.auth.urls")),
     path("orders/", include("orders.urls")),
     path("accounts/", include("accounts.urls")),
-    
+
     # NEW: SEO
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name="robots_txt"),
@@ -30,4 +30,4 @@ urlpatterns = [
 
 # serve static files in DEBUG (ok for local dev)
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=getattr(settings, "MEDIA_ROOT", None))

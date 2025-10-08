@@ -6,6 +6,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse  #for CSV export
 from django.db.models import Min, Sum, F, DecimalField, IntegerField, Q  #unified imports
+from django.db.models import Sum as DSum, F, IntegerField, DecimalField
 from django.db.models.functions import Coalesce
 from orders.models import OrderItem, Order # for dashboard stats
 from .forms import VenueForm, EventForm
@@ -120,12 +121,13 @@ def organizer_dashboard(request):
         messages.error(request, "Organizer dashboard is restricted.")
         return redirect("event_list")
 
+    # Per-row annotations (for the table)
     tt_capacity = Coalesce(Sum("ticket_types__capacity"), 0, output_field=IntegerField())
 
     sold_q = Coalesce(
         Sum(
             "ticket_types__orderitem__qty",
-            filter=Q(ticket_types__orderitem__order__status__in=["PENDING", "PAID"])
+            filter=Q(ticket_types__orderitem__order__status__in=["PENDING", "PAID"]),
         ),
         0,
         output_field=IntegerField()
@@ -149,8 +151,35 @@ def organizer_dashboard(request):
         .order_by("-starts_at")
     )
 
-    # Template path: templates/events/dashboard.html
-    return render(request, "events/dashboard.html", {"events": qs})
+    # Footer totals: aggregate on the underlying relations (NOT on annotated aliases)
+    totals_raw = Event.objects.filter(pk__in=qs.values("pk")).aggregate(
+        total_capacity=Coalesce(Sum("ticket_types__capacity"), 0, output_field=IntegerField()),
+        sold=Coalesce(
+            Sum(
+                "ticket_types__orderitem__qty",
+                filter=Q(ticket_types__orderitem__order__status__in=["PENDING", "PAID"]),
+            ),
+            0,
+            output_field=IntegerField()
+        ),
+        revenue=Coalesce(
+            Sum(
+                F("ticket_types__orderitem__qty") * F("ticket_types__orderitem__unit_price"),
+                filter=Q(ticket_types__orderitem__order__status__in=["PENDING", "PAID"]),
+                output_field=DecimalField(max_digits=12, decimal_places=2),
+            ),
+            0,
+            output_field=DecimalField(max_digits=12, decimal_places=2)
+        ),
+    )
+    totals = {
+        "total_capacity": totals_raw["total_capacity"],
+        "sold": totals_raw["sold"],
+        "revenue": totals_raw["revenue"],
+        "remaining": (totals_raw["total_capacity"] or 0) - (totals_raw["sold"] or 0),
+    }
+
+    return render(request, "events/dashboard.html", {"events": qs, "totals": totals})
 
 
 @staff_member_required  # only staff can export
