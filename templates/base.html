@@ -89,6 +89,27 @@
   <!-- App JS -->
   <script src="{% static 'js/main.js' %}"></script>
   {% block extra_js %}{% endblock %}
+  <footer class="mt-5 py-4 text-center" style="background: linear-gradient(90deg, #0B0C2A, #1C2541); color: #f5f5f5;">
+    <div class="container">
+        <img src="{% static 'images/logo.png' %}" 
+             alt="StagePass Logo" 
+             class="mb-3" 
+             style="height: 90px; border-radius: 50%; box-shadow: 0 0 15px rgba(255, 165, 0, 0.4);">
+        
+        <p class="fw-semibold mb-2" style="color: #FFA64D;">
+            Bringing You Closer to the Stage
+        </p>
+        <a href="mailto:info@stagepass.com" 
+           class="text-decoration-none" 
+           style="color: #FFA64D; font-weight: 500;">
+           info@stagepass.com
+        </a>
+        <p class="mt-3 mb-0" style="font-size: 0.9rem; color: #bbb;">
+            © 2025 StagePass. All rights reserved.
+        </p>
+    </div>
+   </footer>
+
 </body>
 <script>
   const alerts = document.querySelectorAll('.alert');

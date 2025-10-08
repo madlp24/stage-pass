@@ -22,6 +22,7 @@ urlpatterns = [
     path("", include("django.contrib.auth.urls")),
     path("orders/", include("orders.urls")),
     path("accounts/", include("accounts.urls")),
+    
 
     # NEW: SEO
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
