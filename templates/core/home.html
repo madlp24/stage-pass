@@ -3,87 +3,42 @@
 
 {% block content %}
 
-<!-- HERO -->
-<section class="sp-hero py-5">
+<section class="home-intro text-center py-5">
   <div class="container">
-    <div class="row align-items-center g-4">
-      <div class="col-12 col-lg-7">
-        <div class="d-flex align-items-center gap-3 mb-3">
-          <img class="sp-logo" src="{% static 'img/logo.png' %}" alt="StagePass Logo">
-          <div>
-            <h1 class="display-5 mb-1">Welcome to <span class="fw-bold">StagePass</span>!</h1>
-            <p class="lead mb-0">Your gateway to live events at <strong>Teatro Bruma</strong> and beyond.</p>
-          </div>
-        </div>
+    <img src="{% static 'img/logo.png' %}" alt="StagePass Logo" class="home-logo mb-3">
+    <h1 class="display-5 fw-bold">Welcome to StagePass!</h1>
+    <p class="lead text-muted">Your gateway to live events at <strong>Teatro Bruma</strong> and beyond.</p>
 
-        <!-- Search -->
-        <form action="{% url 'event_list' %}" class="row gy-2 gx-2 sp-cta">
-          <div class="col-12 col-md-8 col-lg-9">
-            <input name="q" class="form-control form-control-lg"
-                   placeholder="Search events, venues or artists…">
-          </div>
-          <div class="col-12 col-md-4 col-lg-3">
-            <button class="btn btn-primary btn-lg w-100">Explore Events</button>
-          </div>
-        </form>
-
-        <div class="mt-2">
-          <a class="btn btn-outline-light btn-sm" href="{% url 'about' %}">About StagePass</a>
-        </div>
-      </div>
-
-      <div class="col-12 col-lg-5">
-        <div class="sp-hero-highlight p-4 rounded-3">
-          <p class="mb-1 text-white-50 text-uppercase small letter">What’s new</p>
-          <h3 class="h5 mb-2">Bringing you closer to the stage</h3>
-          <p class="mb-0 text-white-50">Discover concerts, comedy, theater and more — all in one place.</p>
-        </div>
-      </div>
-    </div>
+    <form action="{% url 'event_list' %}" class="d-flex justify-content-center mt-4" role="search">
+      <input type="text" name="q" class="form-control w-50 me-2" placeholder="Search events, venues or artists...">
+      <button type="submit" class="btn btn-primary">Explore</button>
+    </form>
   </div>
 </section>
 
-<!-- FEATURED EVENTS (shows if the view passed `events`) -->
-<section class="py-5">
+<section class="py-5 bg-light">
   <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2 class="h4 mb-0">Featured Events</h2>
-      <a class="btn btn-outline-secondary btn-sm" href="{% url 'event_list' %}">View all</a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="h4 mb-0">Available Events</h2>
+      <a href="{% url 'event_list' %}" class="btn btn-outline-secondary btn-sm">View All</a>
     </div>
 
     {% if events %}
-      <div class="row g-4">
+      <ul class="list-group shadow-sm">
         {% for e in events %}
-          <div class="col-12 col-sm-6 col-lg-4">
-            <div class="card sp-card h-100 shadow-sm">
-              {% if e.image %}
-                <img class="event-thumb" src="{{ e.image.url }}" alt="{{ e.title }}">
-              {% else %}
-                <img class="event-thumb" src="{% static 'img/placeholder_16x9.jpg' %}" alt="{{ e.title }}">
-              {% endif %}
-
-              <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h3 class="h6 mb-0">
-                    <a class="stretched-link text-decoration-none text-light"
-                       href="{% url 'event_detail_slug' e.slug %}">
-                      {{ e.title }}
-                    </a>
-                  </h3>
-                  {% if e.published %}
-                    <span class="badge sp-badge">Published</span>
-                  {% endif %}
-                </div>
-                <div class="small text-white-50">
-                  {{ e.starts_at|date:"D, M j · H:i" }} · {{ e.venue.name }}
-                </div>
-              </div>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <a href="{% url 'event_detail_slug' e.slug %}" class="fw-semibold text-decoration-none text-dark">
+                {{ e.title }}
+              </a>
+              <div class="small text-muted">{{ e.venue.name }} — {{ e.starts_at|date:"M j, Y · H:i" }}</div>
             </div>
-          </div>
+            <a href="{% url 'event_detail_slug' e.slug %}" class="btn btn-sm btn-outline-primary">Details</a>
+          </li>
         {% endfor %}
-      </div>
+      </ul>
     {% else %}
-      <div class="alert alert-dark border-0">No events yet. Check back soon!</div>
+      <div class="alert alert-info border-0">No events available right now. Check back soon!</div>
     {% endif %}
   </div>
 </section>
