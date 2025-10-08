@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 760px">
+  <h1 class="h3">Delete event</h1>
+  <div class="alert alert-warning">
+    <strong>Are you sure?</strong>
+    This will permanently delete <em>{{ event.title }}</em> and its ticket tiers. This can’t be undone.
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <a href="{% url 'event_detail_slug' event.slug %}" class="btn btn-outline-secondary">Cancel</a>
+    <button type="submit" class="btn btn-danger">Yes, delete it</button>
+  </form>
+</div>
+{% endblock %}

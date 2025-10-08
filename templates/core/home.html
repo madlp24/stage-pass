@@ -1,46 +1,22 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block title %}Home • StagePass{% endblock %}
+
 {% block content %}
-
-<section class="home-intro text-center py-5">
-  <div class="container">
-    <img src="{% static 'img/logo.png' %}" alt="StagePass Logo" class="home-logo mb-3">
-    <h1 class="display-5 fw-bold">Welcome to StagePass!</h1>
-    <p class="lead text-muted">Your gateway to live events at <strong>Teatro Bruma</strong> and beyond.</p>
-
-    <form action="{% url 'event_list' %}" class="d-flex justify-content-center mt-4" role="search">
-      <input type="text" name="q" class="form-control w-50 me-2" placeholder="Search events, venues or artists...">
-      <button type="submit" class="btn btn-primary">Explore</button>
-    </form>
-  </div>
-</section>
-
-<section class="py-5 bg-light">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="h4 mb-0">Available Events</h2>
-      <a href="{% url 'event_list' %}" class="btn btn-outline-secondary btn-sm">View All</a>
+<div class="container text-center py-5">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-md-8">
+      <h1 class="display-4 fw-bold mb-3 text-dark">
+        Welcome to <span class="text-primary">StagePass</span>
+      </h1>
+      <p class="lead text-muted mb-4">
+        Your all-access pass to amazing live events and performances.
+      </p>
+      <a href="{% url 'event_list' %}" class="btn btn-primary btn-lg px-4">
+        Browse Events
+      </a>
     </div>
-
-    {% if events %}
-      <ul class="list-group shadow-sm">
-        {% for e in events %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <a href="{% url 'event_detail_slug' e.slug %}" class="fw-semibold text-decoration-none text-dark">
-                {{ e.title }}
-              </a>
-              <div class="small text-muted">{{ e.venue.name }} — {{ e.starts_at|date:"M j, Y · H:i" }}</div>
-            </div>
-            <a href="{% url 'event_detail_slug' e.slug %}" class="btn btn-sm btn-outline-primary">Details</a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <div class="alert alert-info border-0">No events available right now. Check back soon!</div>
-    {% endif %}
   </div>
-</section>
-
+</div>
 {% endblock %}

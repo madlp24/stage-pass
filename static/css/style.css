@@ -79,3 +79,33 @@ form .form-control {
 .letter {
   letter-spacing: .08em;
 }
+/* Minimal home styling */
+.home-intro {
+  background: linear-gradient(180deg, #0d1838 0%, #0e1020 100%);
+  color: #fff;
+}
+.home-logo {
+  width: 120px; height: 120px; border-radius: 50%;
+  box-shadow: 0 0 18px rgba(255, 183, 77, 0.4);
+}
+.bg-light { background-color: #f8f9fa !important; }
+.list-group-item { border: 1px solid #e2e6ea; }
+
+body {
+  background: linear-gradient(to bottom right, #0d1b2a, #1b263b);
+  color: #f8f9fa;
+}
+
+.container h1, .container p {
+  color: #f8f9fa;
+}
+
+.btn-primary {
+  background-color: #f4a261;
+  border-color: #f4a261;
+}
+
+.btn-primary:hover {
+  background-color: #e76f51;
+  border-color: #e76f51;
+}
