@@ -1,15 +1,38 @@
 {% extends "base.html" %}
-{% block title %}About Us - StagePass{% endblock %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+  .about-hero {
+    background: linear-gradient(180deg, #0b1430 0%, #0d1838 35%, #0e1020 100%);
+    color: #fff;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="container py-5 text-center">
-    <h1 class="mb-4 fw-bold">About StagePass</h1>
-    <p class="lead">
-        StagePass is your go-to platform for discovering, booking, and experiencing the best live events.
-        Whether it's concerts, festivals, or exclusive VIP experiences, we make it seamless for fans and event organizers alike.
-    </p>
-    <p class="mt-3">
-        Our mission is to connect audiences with unforgettable live entertainment through simple, secure, and intuitive ticketing.
-    </p>
+<section class="about-hero py-5">
+  <div class="container text-center">
+    <img src="{% static 'img/logo.png' %}" alt="StagePass logo" width="120" height="120"
+         class="rounded-circle shadow mb-3">
+    <h1 class="h2">About StagePass</h1>
+    <p class="lead text-white-50 mb-0">We help fans discover and book amazing live experiences.</p>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <h3>Our mission</h3>
+        <p>Bring audiences closer to artists and venues with a fast, reliable ticketing experience.</p>
+      </div>
+      <div class="col-md-6">
+        <h3>Contact</h3>
+        <p class="mb-1">Email: <a href="mailto:info@stagepass.com">info@stagepass.com</a></p>
+        <p class="mb-0">Instagram / X / Facebook: @stagepass</p>
+      </div>
+    </div>
+  </div>
 </section>
 {% endblock %}
