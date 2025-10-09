@@ -2,6 +2,11 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+<style>
+  body {
+    background-color: #FFC933; 
+  }
+</style>
 <h1 class="h3 mb-3">Create your account</h1>
 
 <form method="post" class="mb-3" novalidate>
@@ -10,8 +15,8 @@
   <button class="btn btn-primary" type="submit">Sign up</button>
 </form>
 
-<p class="text-muted mb-0">
+<p class="text-muted mb-0" style="color: white;">
   Already have an account?
-  <a href="{% url 'login' %}">Log in</a>.
+  <a href="{% url 'login' %}" class="btn btn-primary" >Log in</a>.
 </p>
 {% endblock %}
