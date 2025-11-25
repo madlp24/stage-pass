@@ -80,7 +80,9 @@ def venue_create(request):
     if request.method == "POST":
         form = VenueForm(request.POST)
         if form.is_valid():
-            form.save()
+            venue = form.save(commit=False)
+            venue.created_by = request.user
+            venue.save()
             messages.success(request, "Venue created successfully.")
             return redirect("event_list")
     else:
@@ -93,7 +95,9 @@ def event_create(request):
     if request.method == "POST":
         form = EventForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            ev = form.save(commit=False)
+            ev.created_by = request.user
+            ev.save()
             messages.success(request, "Event created successfully.")
             return redirect("event_list")
     else:
@@ -104,15 +108,46 @@ def event_create(request):
 @login_required
 def event_update(request, pk):
     event = get_object_or_404(Event, pk=pk)
+
+    if not (
+        request.user.is_superuser
+        or (event.created_by and event.created_by == request.user)
+    ):
+        messages.error(request, "You are not allowed to edit this event.")
+        return redirect("event_detail_slug", slug=event.slug)
+
     if request.method == "POST":
         form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
             form.save()
             messages.success(request, "Event updated successfully.")
-            return redirect("event_detail", pk=pk)
+            return redirect("event_detail_slug", slug=event.slug)
     else:
         form = EventForm(instance=event)
+
     return render(request, "events/event_form.html", {"form": form})
+
+@login_required
+def venue_update(request, pk):
+    venue = get_object_or_404(Venue, pk=pk)
+
+    if not (
+        request.user.is_superuser
+        or (venue.created_by and venue.created_by == request.user)
+    ):
+        messages.error(request, "You are not allowed to edit this venue.")
+        return redirect("event_list")
+
+    if request.method == "POST":
+        form = VenueForm(request.POST, instance=venue)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Venue updated successfully.")
+            return redirect("event_list")
+    else:
+        form = VenueForm(instance=venue)
+
+    return render(request, "events/venue_form.html", {"form": form})
 
 
 # ---------- Organizer: Dashboard & CSV ----------
@@ -223,16 +258,35 @@ def export_events_csv(request):
 def event_delete(request, pk):
     event = get_object_or_404(Event, pk=pk)
 
-    # Only staff or organizer/owner can delete
-    is_owner = getattr(event, "organizer_id", None) == request.user.id
-    if not (request.user.is_staff or is_owner):
-        return HttpResponseForbidden("You don’t have permission to delete this event.")
+    if not (
+        request.user.is_superuser
+        or (event.created_by and event.created_by == request.user)
+    ):
+        messages.error(request, "You are not allowed to delete this event.")
+        return redirect("event_detail_slug", slug=event.slug)
 
     if request.method == "POST":
-        title = event.title
         event.delete()
-        messages.success(request, f'“{title}” was deleted.')
+        messages.success(request, "Event deleted.")
         return redirect("event_list")
 
-    # GET: show confirmation screen
     return render(request, "events/event_confirm_delete.html", {"event": event})
+
+
+@login_required
+def venue_delete(request, pk):
+    venue = get_object_or_404(Venue, pk=pk)
+
+    if not (
+        request.user.is_superuser
+        or (venue.created_by and venue.created_by == request.user)
+    ):
+        messages.error(request, "You are not allowed to delete this venue.")
+        return redirect("event_list")
+
+    if request.method == "POST":
+        venue.delete()
+        messages.success(request, "Venue deleted.")
+        return redirect("event_list")
+
+    return render(request, "events/venue_confirm_delete.html", {"venue": venue})
