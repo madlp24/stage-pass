@@ -5,30 +5,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}StagePass{% endblock %}</title>
+
   <meta property="og:site_name" content="StagePass" />
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:title" content="{% block og_title %}StagePass{% endblock %}">
   <meta property="og:description" content="{% block og_desc %}Find and book live events at Teatro Bruma and beyond.{% endblock %}">
   <meta property="og:image" content="{% block og_image %}{% endblock %}">
   <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+
   <meta name="twitter:card" content="summary_large_image">
+
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- Your app CSS -->
+  <!-- App CSS -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <!-- Navbar -->
+
+  <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container">
       <a class="navbar-brand" href="/">🎭 StagePass</a>
+
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
+
+        <!-- LEFT SIDE -->
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'event_list' %}">Events</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
@@ -36,102 +43,113 @@
           {% if user.is_authenticated %}
             <li class="nav-item"><a class="nav-link" href="{% url 'venue_create' %}">New Venue</a></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'event_create' %}">New Event</a></li>
-            {% if user.is_authenticated and user.is_staff %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
-                {% endif %}
+
+            {% if user.is_staff %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
             {% endif %}
+
+            <li class="nav-item"><a class="nav-link" href="{% url 'my_orders' %}">My Orders</a></li>
+          {% endif %}
 
           <li class="nav-item">
             <a class="nav-link" href="{% url 'cart_detail' %}">
               Cart{% if cart_count %} <span class="badge text-bg-light">{{ cart_count }}</span>{% endif %}
             </a>
           </li>
+        </ul>
+
+        <!-- RIGHT SIDE -->
+        <ul class="navbar-nav ms-auto d-flex align-items-center">
 
           {% if user.is_authenticated %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'my_orders' %}">My Orders</a></li>
+            <li class="nav-item d-flex align-items-center">
+              <span class="nav-link px-2">Hello, {{ user.username }}</span>
+            </li>
+            <li class="nav-item">
+              <form method="post" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn nav-link px-2 border-0 bg-transparent">Logout</button>
+              </form>
+            </li>
+
+          {% else %}
+
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'signup' %}">Sign up</a>
+            </li>
+
           {% endif %}
         </ul>
-
-        <ul class="navbar-nav ms-auto d-flex align-items-center">
-            {% if user.is_authenticated %}
-                <li class="nav-item d-flex align-items-center">
-                    <span class="nav-link px-2">Hello, {{ user.username }}</span>
-                </li>
-                <li class="nav-item">
-                    <form method="post" action="{% url 'logout' %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn nav-link px-2 border-0 bg-transparent">Logout</button>
-                    </form>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'signup' %}">Sign up</a>
-                </li>
-            {% endif %}
-        </ul>
-
 
       </div>
     </div>
   </nav>
 
-  <!-- Messages -->
+
+  <!-- FLASH MESSAGES -->
   <div class="container">
     {% if messages %}
       {% for m in messages %}
         <div class="alert alert-{{ m.tags|default:'info' }} alert-dismissible fade show" role="alert">
           {{ m }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
       {% endfor %}
     {% endif %}
   </div>
 
-  <!-- Page Content -->
+
+  <!-- PAGE CONTENT -->
   <main class="container mb-5">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Bootstrap 5 JS -->
+
+  <!-- FOOTER -->
+  <footer class="mt-5 py-4 text-center" style="background: linear-gradient(90deg, #0B0C2A, #1C2541); color: #f5f5f5;">
+    <div class="container">
+
+      <img src="{% static 'images/logo.png' %}" alt="StagePass Logo"
+           class="mb-3"
+           style="height: 90px; border-radius: 50%; box-shadow: 0 0 15px rgba(255, 165, 0, 0.4);">
+
+      <p class="fw-semibold mb-2" style="color: #FFA64D;">Bringing You Closer to the Stage</p>
+
+      <a href="mailto:info@stagepass.com"
+         class="text-decoration-none"
+         style="color: #FFA64D; font-weight: 500;">
+         info@stagepass.com
+      </a>
+
+      <p class="mt-3 mb-0" style="font-size: 0.9rem; color: #bbb;">
+        © 2025 StagePass. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+
+  <!-- Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- App JS -->
   <script src="{% static 'js/main.js' %}"></script>
+
   {% block extra_js %}{% endblock %}
-  <footer class="mt-5 py-4 text-center" style="background: linear-gradient(90deg, #0B0C2A, #1C2541); color: #f5f5f5;">
-    <div class="container">
-        <img src="{% static 'images/logo.png' %}" 
-             alt="StagePass Logo" 
-             class="mb-3" 
-             style="height: 90px; border-radius: 50%; box-shadow: 0 0 15px rgba(255, 165, 0, 0.4);">
-        
-        <p class="fw-semibold mb-2" style="color: #FFA64D;">
-            Bringing You Closer to the Stage
-        </p>
-        <a href="mailto:info@stagepass.com" 
-           class="text-decoration-none" 
-           style="color: #FFA64D; font-weight: 500;">
-           info@stagepass.com
-        </a>
-        <p class="mt-3 mb-0" style="font-size: 0.9rem; color: #bbb;">
-            © 2025 StagePass. All rights reserved.
-        </p>
-    </div>
-   </footer>
+
+  <script>
+    const alerts = document.querySelectorAll('.alert');
+    if (alerts.length) {
+      setTimeout(() => {
+        alerts.forEach(a => {
+          const bsAlert = new bootstrap.Alert(a);
+          bsAlert.close();
+        });
+      }, 4000);
+    }
+  </script>
 
 </body>
-<script>
-  const alerts = document.querySelectorAll('.alert');
-  if (alerts.length) {
-    setTimeout(() => {
-      alerts.forEach(a => {
-        const bsAlert = new bootstrap.Alert(a);
-        bsAlert.close();
-      });
-    }, 4000);
-  }
-</script>
 </html>
