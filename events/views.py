@@ -69,10 +69,26 @@ def event_detail(request, pk):
 def event_detail_slug(request, slug):
     event = get_object_or_404(
         Event.objects.select_related("venue").prefetch_related("ticket_types"),
-        slug=slug, published=True
+        slug=slug,
+        published=True,
     )
-    return render(request, "events/event_detail.html", {"event": event})
 
+    can_edit = (
+        request.user.is_authenticated
+        and (
+            request.user.is_superuser
+            or event.created_by_id == request.user.id
+        )
+    )
+
+    return render(
+        request,
+        "events/event_detail.html",
+        {
+            "event": event,
+            "can_edit": can_edit,
+        },
+    )
 
 # ---------- Organizer: CRUD ----------
 @login_required
