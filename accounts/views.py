@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from .forms import SignUpForm
+from django.contrib.auth.views import LoginView
 
 def signup(request):
     if request.user.is_authenticated:
@@ -18,3 +19,13 @@ def signup(request):
         form = SignUpForm()
 
     return render(request, "accounts/signup.html", {"form": form})
+
+
+class CustomLoginView(LoginView):
+    template_name = "registration/login.html"  # adjust if your path is different
+
+    def dispatch(self, request, *args, **kwargs):
+        # 👇 Block login page if user already logged in
+        if request.user.is_authenticated:
+            return redirect("event_list")  # your homepage or dashboard
+        return super().dispatch(request, *args, **kwargs)
