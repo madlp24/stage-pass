@@ -4,11 +4,20 @@ from django.utils.text import slugify
 from django.db.models import Sum, F, Q
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.conf import settings
 
+User = settings.AUTH_USER_MODEL
 class Venue(models.Model):
     name = models.CharField(max_length=120)
     address = models.TextField(blank=True)
     capacity = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="venues_created",
+    )
+
     def __str__(self): return self.name
 
 
@@ -28,7 +37,13 @@ class Event(models.Model):
     ends_at = models.DateTimeField()
     published = models.BooleanField(default=False)
     image = models.ImageField(upload_to="events/", blank=True, null=True)
-
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="events_created",
+    )
+    
     def __str__(self):
         return f"{self.title} @ {self.venue}"
 
