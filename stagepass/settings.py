@@ -10,23 +10,18 @@ USE_CLOUDINARY = bool(os.environ.get("CLOUDINARY_URL"))
 # -----------------------------------------------------------------------------
 # Security
 # -----------------------------------------------------------------------------
-DEBUG = False  
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+ 
 
-if os.path.exists(Path(__file__).resolve().parent.parent / "env.py"):
-    import env
 
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "django-insecure-rm(gh1k1ib25k-d@^lylz#cqeh5)^wsh6fgynl%!)*s$%m9@8+" 
-)
+SECRET_KEY = os.environ["SECRET_KEY"]
+
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS",
     ".herokuapp.com,127.0.0.1,localhost"
 ).split(",")
 
-if os.environ.get("ALLOWED_HOSTS"):
-    ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(",")
 
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS",
