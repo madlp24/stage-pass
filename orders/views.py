@@ -10,13 +10,18 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from events.models import TicketType
-from .cart import add_item, set_qty, remove_item, items_with_details, empty
+
+from .cart import add_item, empty, items_with_details, remove_item, set_qty
 from .models import Order, OrderItem
 
 
 def cart_detail(request):
     items, grand = items_with_details(request.session, TicketType)
-    return render(request, "orders/cart.html", {"items": items, "grand_total": grand})
+    return render(
+        request,
+        "orders/cart.html",
+        {"items": items, "grand_total": grand},
+    )
 
 
 @require_POST
@@ -27,16 +32,21 @@ def cart_add(request, ticket_type_id):
     except ValueError:
         qty = 1
 
-    # enforce per_user_limit and remaining capacity
     current_qty = int(request.session.get("cart", {}).get(str(tt.id), 0))
     desired_total = current_qty + qty
     if tt.per_user_limit and desired_total > tt.per_user_limit:
-        messages.error(request, f"Limit {tt.per_user_limit} per user for {tt.name}.")
+        messages.error(
+            request,
+            f"Limit {tt.per_user_limit} per user for {tt.name}.",
+        )
         return redirect("event_detail", pk=tt.event_id)
 
     remaining = tt.remaining_capacity()
     if desired_total > remaining:
-        messages.error(request, f"Only {remaining} tickets remaining for {tt.name}.")
+        messages.error(
+            request,
+            f"Only {remaining} tickets remaining for {tt.name}.",
+        )
         return redirect("event_detail", pk=tt.event_id)
 
     add_item(request.session, tt.id, qty)
@@ -57,11 +67,17 @@ def cart_update(request, ticket_type_id):
 
     if qty > 0:
         if tt.per_user_limit and qty > tt.per_user_limit:
-            messages.error(request, f"Limit {tt.per_user_limit} per user for {tt.name}.")
+            messages.error(
+                request,
+                f"Limit {tt.per_user_limit} per user for {tt.name}.",
+            )
             return redirect("cart_detail")
         remaining = tt.remaining_capacity()
         if qty > remaining:
-            messages.error(request, f"Only {remaining} tickets remaining for {tt.name}.")
+            messages.error(
+                request,
+                f"Only {remaining} tickets remaining for {tt.name}.",
+            )
             return redirect("cart_detail")
 
     set_qty(request.session, tt.id, qty)
@@ -83,33 +99,45 @@ def checkout(request):
         messages.info(request, "Your cart is empty.")
         return redirect("cart_detail")
 
-    # Final validation & atomic order creation
     with transaction.atomic():
-        # re-check limits/remaining just before creation
         for it in items:
             tt = it["ticket_type"]
             qty = it["qty"]
             if tt.per_user_limit and qty > tt.per_user_limit:
-                messages.error(request, f"Limit {tt.per_user_limit} per user for {tt.name}.")
+                messages.error(
+                    request,
+                    f"Limit {tt.per_user_limit} per user for {tt.name}.",
+                )
                 return redirect("cart_detail")
             remaining = tt.remaining_capacity()
             if qty > remaining:
-                messages.error(request, f"Only {remaining} tickets remaining for {tt.name}.")
+                messages.error(
+                    request,
+                    f"Only {remaining} tickets remaining for {tt.name}.",
+                )
                 return redirect("cart_detail")
 
-        order = Order.objects.create(user=request.user, status="PAID", total=Decimal("0.00"))
+        order = Order.objects.create(
+            user=request.user,
+            status="PAID",
+            total=Decimal("0.00"),
+        )
         total = Decimal("0.00")
         for it in items:
             tt = it["ticket_type"]
             qty = it["qty"]
             unit = it["unit_price"]
-            OrderItem.objects.create(order=order, ticket_type=tt, qty=qty, unit_price=unit)
+            OrderItem.objects.create(
+                order=order,
+                ticket_type=tt,
+                qty=qty,
+                unit_price=unit,
+            )
             total += unit * qty
 
         order.total = total
         order.save()
 
-    # Email receipt (console in dev; SMTP if configured via env)
     subject = f"StagePass - Order #{order.pk} confirmed"
     site_root = request.build_absolute_uri("/").rstrip("/")
     order_url = site_root + reverse("order_detail", args=[order.pk])
@@ -122,9 +150,14 @@ def checkout(request):
     recipient = [request.user.email] if request.user.email else []
     if recipient:
         try:
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient, fail_silently=True)
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                recipient,
+                fail_silently=True,
+            )
         except Exception:
-            # don't block checkout on email errors
             pass
 
     empty(request.session)
@@ -146,6 +179,7 @@ def my_orders(request):
 def order_detail(request, pk):
     order = get_object_or_404(
         Order.objects.prefetch_related("items__ticket_type__event"),
-        pk=pk, user=request.user
+        pk=pk,
+        user=request.user,
     )
     return render(request, "orders/order_detail.html", {"order": order})

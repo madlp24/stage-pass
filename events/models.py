@@ -1,12 +1,13 @@
-# events/models.py
-from django.db import models
-from django.utils.text import slugify
-from django.db.models import Sum, F, Q
-from django.core.exceptions import ValidationError
-from django.utils import timezone
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.db.models import F, Q, Sum
+from django.utils import timezone
+from django.utils.text import slugify
 
 User = settings.AUTH_USER_MODEL
+
+
 class Venue(models.Model):
     name = models.CharField(max_length=120)
     address = models.TextField(blank=True)
@@ -14,11 +15,13 @@ class Venue(models.Model):
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         related_name="venues_created",
     )
 
-    def __str__(self): return self.name
+    def __str__(self):
+        return self.name
 
 
 def title_validator(value: str):
@@ -29,7 +32,11 @@ def title_validator(value: str):
 
 
 class Event(models.Model):
-    venue = models.ForeignKey(Venue, on_delete=models.PROTECT, related_name="events")
+    venue = models.ForeignKey(
+        Venue,
+        on_delete=models.PROTECT,
+        related_name="events",
+    )
     title = models.CharField(max_length=200, validators=[title_validator])
     slug = models.SlugField(max_length=220, unique=True, blank=True)
     description = models.TextField()
@@ -40,10 +47,11 @@ class Event(models.Model):
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         related_name="events_created",
     )
-    
+
     def __str__(self):
         return f"{self.title} @ {self.venue}"
 
@@ -87,18 +95,27 @@ class Event(models.Model):
 
 
 class TicketType(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="ticket_types")
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="ticket_types",
+    )
     name = models.CharField(max_length=120)
     price = models.DecimalField(max_digits=8, decimal_places=2)
     capacity = models.PositiveIntegerField(default=0)
     per_user_limit = models.PositiveIntegerField(default=4)
-    def __str__(self): return f"{self.name} - {self.event.title}"
+
+    def __str__(self):
+        return f"{self.name} - {self.event.title}"
 
     def sold_quantity(self):
         from orders.models import OrderItem
         return (
             OrderItem.objects
-            .filter(ticket_type=self, order__status__in=["PENDING", "PAID"])
+            .filter(
+                ticket_type=self,
+                order__status__in=["PENDING", "PAID"],
+            )
             .aggregate(total=Sum("qty"))["total"] or 0
         )
 

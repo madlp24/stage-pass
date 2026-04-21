@@ -1,4 +1,4 @@
-﻿# Secrets
+# Secrets
 env.py
 .env
 
@@ -9,7 +9,11 @@ db.sqlite3
 # Python cache
 __pycache__/
 *.py[cod]
+*.pyo
 
 # Virtual environments
 .venv/
 venv/
+
+# Django collected static
+staticfiles/

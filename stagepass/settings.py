@@ -1,32 +1,34 @@
 # stagepass/settings.py
 from pathlib import Path
-import os
+
 import dj_database_url  # pip install dj-database-url
+from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-USE_CLOUDINARY = bool(os.environ.get("CLOUDINARY_URL"))
+USE_CLOUDINARY = bool(config("CLOUDINARY_URL", default=""))
 
 # -----------------------------------------------------------------------------
 # Security
 # -----------------------------------------------------------------------------
-DEBUG = os.environ.get("DEBUG", "False") == "True"
- 
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 
-SECRET_KEY = os.environ["SECRET_KEY"]
+SECRET_KEY = config("SECRET_KEY")
 
 
-ALLOWED_HOSTS = os.environ.get(
+ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
-    ".herokuapp.com,127.0.0.1,localhost"
-).split(",")
+    default="localhost,127.0.0.1",
+    cast=Csv(),
+)
 
 
-CSRF_TRUSTED_ORIGINS = os.environ.get(
+CSRF_TRUSTED_ORIGINS = config(
     "CSRF_TRUSTED_ORIGINS",
-    ""
-).split(",") if os.environ.get("CSRF_TRUSTED_ORIGINS") else []
+    default="",
+    cast=Csv(),
+)
 
 # -----------------------------------------------------------------------------
 # Apps
@@ -61,7 +63,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # -----------------------------------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware", 
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -108,9 +110,10 @@ MEDIA_URL = "/media/"
 if not USE_CLOUDINARY:
     MEDIA_ROOT = BASE_DIR / "media"
 
-if os.environ.get("DATABASE_URL"):
+DATABASE_URL = config("DATABASE_URL", default="")
+if DATABASE_URL:
     DATABASES["default"] = dj_database_url.config(
-        default=os.environ["DATABASE_URL"],
+        default=DATABASE_URL,
         conn_max_age=600,
         ssl_require=True,
     )
@@ -158,11 +161,14 @@ USE_X_FORWARDED_HOST = True
 # -----------------------------------------------------------------------------
 # Email
 # -----------------------------------------------------------------------------
-EMAIL_BACKEND = os.environ.get(
+EMAIL_BACKEND = config(
     "EMAIL_BACKEND",
-    "django.core.mail.backends.console.EmailBackend"
+    default="django.core.mail.backends.console.EmailBackend",
 )
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "stagepass@example.com")
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL",
+    default="stagepass@example.com",
+)
 
 # -----------------------------------------------------------------------------
 # Default PK
@@ -170,4 +176,3 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "stagepass@example.com
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
