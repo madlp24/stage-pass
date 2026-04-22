@@ -1,4 +1,5 @@
 # stagepass/settings.py
+import os
 from pathlib import Path
 
 import dj_database_url  # pip install dj-database-url
@@ -6,7 +7,15 @@ from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-USE_CLOUDINARY = bool(config("CLOUDINARY_URL", default=""))
+USE_CLOUDINARY = config("USE_CLOUDINARY", default=False, cast=bool)
+
+# The cloudinary_storage library reads CLOUDINARY_URL from os.environ, not
+# from Django settings. decouple.config() doesn't populate os.environ, so
+# mirror the value across when Cloudinary storage is active.
+if USE_CLOUDINARY:
+    _cloudinary_url = config("CLOUDINARY_URL", default="")
+    if _cloudinary_url:
+        os.environ["CLOUDINARY_URL"] = _cloudinary_url
 
 # -----------------------------------------------------------------------------
 # Security
@@ -143,16 +152,24 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"
-        if USE_CLOUDINARY
-        else "django.core.files.storage.FileSystemStorage",
-    },
-}
+if USE_CLOUDINARY:
+    STORAGES = {
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+    }
+else:
+    STORAGES = {
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+    }
 
 # Honor X-Forwarded headers from Heroku's router
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
